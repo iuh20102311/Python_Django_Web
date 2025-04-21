@@ -1,0 +1,123 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Items{% endblock title %}
+
+{% block content %}
+    <div class="pb-6 grid grid-cols-4 gap-4">
+        <div class="col-span-1">
+            <div class="sticky top-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Filters</h3>
+                    
+                    <form method="GET" action="{% url 'item:items' %}">
+                        <!-- Search input với icon -->
+                        <div class="relative mb-4">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <input 
+                                type="text" 
+                                name="query" 
+                                placeholder="Search items..." 
+                                class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200" 
+                                value="{{ query }}"
+                            >
+                        </div>
+                        
+                        <!-- Divider với text Categories -->
+                        <div class="relative my-6">
+                            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                                <div class="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div class="relative flex justify-start">
+                                <span class="bg-white pr-3 text-sm font-medium text-gray-500">Categories</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Category list với style nâng cao -->
+                        <div class="space-y-1 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                            <div class="mb-3 {% if not category_id %}bg-teal-50 text-teal-700 border-l-4 border-teal-500{% endif %} transition-all duration-200 rounded-r-lg">
+                                <a href="{% url 'item:items' %}{% if query %}?query={{ query }}{% endif %}" class="block py-2 px-3">
+                                    <span class="font-medium">All Categories</span>
+                                </a>
+                            </div>
+                            
+                            {% for category in categories %}
+                                <div class="{% if category.id == category_id %}bg-teal-50 text-teal-700 border-l-4 border-teal-500{% endif %} transition-all duration-200 rounded-r-lg hover:bg-gray-50">
+                                    <a href="{% url 'item:items' %}?{% if query %}query={{ query }}&{% endif %}category={{ category.id }}" 
+                                       class="block py-2 px-3 flex items-center justify-between">
+                                        <span class="{% if category.id == category_id %}font-medium{% endif %}">{{ category.name }}</span>
+                                        <span class="text-xs font-medium px-2 py-1 rounded-full {% if category.id == category_id %}bg-teal-200 text-teal-800{% else %}bg-gray-100 text-gray-600{% endif %}">
+                                            {{ category.items.count }}
+                                        </span>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Action buttons -->
+                        <div class="mt-6 space-y-3">
+                            <button type="submit" class="w-full flex items-center justify-center px-4 py-3 bg-teal-500 text-white font-medium rounded-lg hover:bg-teal-600 transition-all duration-200 shadow-sm hover:shadow transform hover:-translate-y-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                                Search
+                            </button>
+                            
+                            {% if query or category_id %}
+                                <a href="{% url 'item:items' %}" class="w-full flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                    Clear All Filters
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Optional: Stats or additional info -->
+                <div class="mt-4 p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                    <p class="text-sm text-gray-500">
+                        Showing <span class="font-medium text-gray-700">{{ items|length }}</span> items
+                        {% if category_id %}in selected category{% endif %}
+                        {% if query %}matching "{{ query }}"{% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for item in items %}
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden h-full">
+                        <a href="{% url 'item:detail' item.id %}" class="block h-full flex flex-col">
+                            <div class="h-64 overflow-hidden flex items-center justify-center">
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" class="w-full h-auto max-h-64 object-contain">
+                                {% else %}
+                                    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                                        <span class="text-gray-400 font-medium">No image</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+    
+                            <div class="p-6 flex-1 flex flex-col">
+                                <h2 class="text-xl font-semibold mb-2">{{ item.name }}</h2>
+                                <p class="text-gray-500 font-medium mt-auto">Price: ${{ item.price }}</p>
+    
+                                {% if item.is_sold %}
+                                    <p class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 mt-2">
+                                        Sold
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
